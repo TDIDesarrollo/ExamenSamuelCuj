@@ -1,0 +1,82 @@
+﻿@page "/Users"
+@using Common.Models.Users
+@inject IUsersServices UsersServices
+
+@if(users is null || users.Count == 0)
+{
+    <div class="text-center p-5 text-muted">
+        <i class="bi bi-inbox display-4 d-block mb-3"></i>
+        <h5>No data available</h5>
+    </div>
+}
+else
+{
+    <div class="container mt-3">
+        <h3 class="text-center mb-4">User List</h3>
+
+        <table class="table table-striped table-hover table-bordered align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Phone</th>
+                    @* <th scope="col" class="text-center">Actions</th> *@
+                </tr>
+
+                <tr class="table-light">
+                    
+                    <th><input @bind="filterId" class="form-control form-control-sm" placeholder="Search Id"></th>
+                    <th><input @bind="filterName" class="form-control form-control-sm" placeholder="Search Name"></th>
+                    <th><input @bind="filterUsername" class="form-control form-control-sm" placeholder="Search Username"></th>
+                    <th><input @bind="filterEmail" class="form-control form-control-sm" placeholder="Search Email"></th>
+                    <th><input @bind="filterPhone" class="form-control form-control-sm" placeholder="Search Phone"></th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in FilteredUsers)
+                {
+                    <tr>
+                        <td>@u.Id</td>
+                        <td>@u.Name</td>
+                        <td>@u.Username</td>
+                        <td>@u.Email</td>
+                        <td>@u.Phone</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    
+}
+
+
+@code {
+	List<User?>? users;
+    private string filterId = string.Empty;
+    private string filterName = string.Empty;
+    private string filterUsername = string.Empty;
+    private string filterEmail = string.Empty;
+    private string filterPhone = string.Empty;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		var res = await UsersServices.GetAllUsers();
+		if (res.IsSuccess)
+		{
+			users = res.Data!;
+		}
+	}
+
+    private IEnumerable<User?>? FilteredUsers =>
+    users.Where(u =>
+        (string.IsNullOrEmpty(filterId) || u.Id.ToString().Contains(filterId, StringComparison.OrdinalIgnoreCase)) &&
+        (string.IsNullOrEmpty(filterName) || u.Name.Contains(filterName, StringComparison.OrdinalIgnoreCase)) &&
+        (string.IsNullOrEmpty(filterEmail) || u.Email.Contains(filterEmail, StringComparison.OrdinalIgnoreCase)) &&
+        (string.IsNullOrEmpty(filterUsername) || u.Username.Contains(filterUsername, StringComparison.OrdinalIgnoreCase)) &&
+        (string.IsNullOrEmpty(filterPhone) || u.Phone.Contains(filterPhone))
+    );
+}
